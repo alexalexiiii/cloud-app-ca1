@@ -45,6 +45,7 @@ export class MoviesAppStack extends cdk.Stack {
    const userPool = new cognito.UserPool(this, 'UserPool', { selfSignUpEnabled: true, signInAliases: { email: true } });
    const userPoolClient = new cognito.UserPoolClient(this, 'AppClient', { userPool });
 
+   // rest api 
    const api = new apigw.RestApi(this, 'MoviesApi', {
     restApiName: 'Movies REST Api',
     deployOptions: {
@@ -53,6 +54,22 @@ export class MoviesAppStack extends cdk.Stack {
       dataTraceEnabled: true
     }
    });
+
+   // cognito authorizer for GET requests
+   const authorizer = new apigw.CognitoUserPoolsAuthorizer(this, 'MoviesAuthorizer', {
+    cognitoUserPools: [userPool],
+  });
+  
+  // admin API key for POST/DELETE requests
+  const apiKey = api.addApiKey('AdminApiKey');
+  const usagePlan = api.addUsagePlan('AdminUsagePlan', {
+    apiStages: [{api, stage: api.deploymentStage}],
+  });
+  usagePlan.addApiKey(apiKey);
+  
+  // define endpoints
+
+
 
 
   }
