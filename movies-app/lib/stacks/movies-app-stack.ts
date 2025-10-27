@@ -11,7 +11,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as eventSources from 'aws-cdk-lib/aws-lambda-event-sources';
-
+import * as logs from 'aws-cdk-lib/aws-logs'; 
 
 export class MoviesAppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -43,6 +43,12 @@ export class MoviesAppStack extends cdk.Stack {
    }));
 
    table.grantStreamRead(stateLogger);
+   const requestLogs = new logs.LogGroup(this, 'MoviesApiLogGroup', {
+      logGroupName: '/aws/movies-api/requests',
+      retention: logs.RetentionDays.ONE_MONTH,
+      removalPolicy: RemovalPolicy.DESTROY
+    });
+
    const userPool = new cognito.UserPool(this, 'UserPool', { selfSignUpEnabled: true, signInAliases: { email: true } });
    const userPoolClient = new cognito.UserPoolClient(this, 'AppClient', { userPool });
 
