@@ -42,6 +42,7 @@ export class MoviesAppStack extends cdk.Stack {
     batchSize: 5
    }));
 
+   table.grantStreamRead(stateLogger);
    const userPool = new cognito.UserPool(this, 'UserPool', { selfSignUpEnabled: true, signInAliases: { email: true } });
    const userPoolClient = new cognito.UserPoolClient(this, 'AppClient', { userPool });
 
