@@ -45,7 +45,14 @@ export class MoviesAppStack extends cdk.Stack {
    const userPool = new cognito.UserPool(this, 'UserPool', { selfSignUpEnabled: true, signInAliases: { email: true } });
    const userPoolClient = new cognito.UserPoolClient(this, 'AppClient', { userPool });
 
-   
+   const api = new apigw.RestApi(this, 'MoviesApi', {
+    restApiName: 'Movies REST Api',
+    deployOptions: {
+      stageName: 'dev',
+      loggingLevel: apigw.MethodLoggingLevel.INFO,
+      dataTraceEnabled: true
+    }
+   });
 
 
   }

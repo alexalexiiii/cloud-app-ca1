@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { MoviesAppStack } from '../lib/movies-app-stack';
+import { MoviesAppStack } from '../lib/stacks/movies-app-stack';
 
 const app = new cdk.App();
 new MoviesAppStack(app, 'MoviesAppStack', {
