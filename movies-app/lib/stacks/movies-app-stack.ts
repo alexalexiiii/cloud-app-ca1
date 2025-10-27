@@ -66,11 +66,38 @@ export class MoviesAppStack extends cdk.Stack {
     apiStages: [{api, stage: api.deploymentStage}],
   });
   usagePlan.addApiKey(apiKey);
-  
-  // define endpoints
 
+  // define all endpoints to be queried
+  const movies = api.root.addResource('movies');
+const movie = movies.addResource('{movieid}');
+const actors = movie.addResource('actors');
+const actor = actors.addResource('{actorid}');
+const awards = api.root.addResource('awards');
 
+// for integration 
+const lambdaIntegration = new apigw.LambdaIntegration(apiHandler);
 
+// GET requests that require cognito authentication 
+movie.addMethod('GET', lambdaIntegration, {
+  authorizer,
+  authorizationType: apigw.AuthorizationType.COGNITO,
+});
+actors.addMethod('GET', lambdaIntegration, {
+  authorizer,
+  authorizationType: apigw.AuthorizationType.COGNITO,
+});
+actor.addMethod('GET', lambdaIntegration, {
+  authorizer,
+  authorizationType: apigw.AuthorizationType.COGNITO,
+});
+awards.addMethod('GET', lambdaIntegration, {
+  authorizer,
+  authorizationType: apigw.AuthorizationType.COGNITO,
+});
+
+// requests for admin only that require an API key
+movies.addMethod('POST', lambdaIntegration, { apiKeyRequired: true });
+movie.addMethod('DELETE', lambdaIntegration, { apiKeyRequired: true });
 
   }
 }
