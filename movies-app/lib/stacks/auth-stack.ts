@@ -7,3 +7,13 @@ export class AuthStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
 
+      this.userPool = new cognito.UserPool(this, 'MoviesUserPool', {
+    selfSignUpEnabled: true,
+    signInAliases: {email: true, username: true},
+  });
+
+  this.userPool.addClient('MoviesAppClient', {
+    authFlows: {userPassword: true },
+  });
+}
+}
