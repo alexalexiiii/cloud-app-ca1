@@ -12,3 +12,20 @@ interface LoggingStackProps extends StackProps {
     table?: dynamodb.Table;
 }
 
+// cloudwatch logging group for useractivity logs
+// lambda function that logs database state changes
+export class LoggingStack extends Stack {
+    public readonly logGroup: logs.LogGroup;
+    public readonly stateLoggerFn?: lambda.Function;
+
+    constructor(scope: Construct, id: string, props?: LoggingStackProps) {
+        super(scope, id, props);
+
+        // capturing log entries using cloudwatch log group for user req logging
+        this.logGroup = new logs.LogGroup(this, 'MoviesApiLogs', {
+            logGroupName: '/aws/movies-api/requests',
+            retention: logs.RetentionDays.ONE_MONTH,
+            removalPolicy: logs.RemovalPolicy.DESTROY,
+        });
+    }
+}
