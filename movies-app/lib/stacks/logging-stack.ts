@@ -25,7 +25,17 @@ export class LoggingStack extends Stack {
         this.logGroup = new logs.LogGroup(this, 'MoviesApiLogs', {
             logGroupName: '/aws/movies-api/requests',
             retention: logs.RetentionDays.ONE_MONTH,
-            removalPolicy: logs.RemovalPolicy.DESTROY,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
         });
+
+        // lambda function that is triggered by dynamodb stream events
+        // writes logs to cloudwatch whenever record is insert.ed or deleted
+        if (props?.table) {
+            this.stateLoggerFn = new lambda.Function(this, 'StateLoggerFn', {
+                runtime: lambda.Runtime.NODEJS_18_X,
+                code: lambda.Code.fromAsset('lambda/stateLogger'),
+                handler: 'index.handler',
+            });
+        }
     }
 }
