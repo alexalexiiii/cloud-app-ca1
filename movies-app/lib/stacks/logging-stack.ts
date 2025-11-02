@@ -6,6 +6,7 @@ import {
     aws_lambda_event_sources as eventSources
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib';
 
 // pass dynamodb table so the stack can attach a stream listener
 interface LoggingStackProps extends StackProps {
@@ -36,6 +37,14 @@ export class LoggingStack extends Stack {
                 code: lambda.Code.fromAsset('lambda/stateLogger'),
                 handler: 'index.handler',
             });
+
+            // this function connects dynamodb stream as an event source to the lambda, recieves an event each time an item in the table is added/modified/deleted
+            this.stateLoggerFn.addEventSource(new eventSources.DynamoEventSource(props.table, {
+                startingPosition: lambda.StartingPosition.TRIM_HORIZON,
+                batchSize: 5,
+            }));
+
+            props.table.grantStreamRead(this.stateLoggerFn);
         }
     }
 }
