@@ -31,3 +31,5 @@ export class ApiStack extends Stack {
         });
         table.grantReadWriteData(lambdaRole);
 
+      }
+    }
