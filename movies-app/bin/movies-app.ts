@@ -16,3 +16,9 @@ new ApiStack(app, 'ApiStack', {
   userPool: authStack.userPool,
   logGroup: logStack.logGroup,
 });
+
+dbStack.addDependency(authStack);
+dbStack.addDependency(logStack);
+authStack.addDependency(logStack);
+// added dependencies for proper deployment order
+
