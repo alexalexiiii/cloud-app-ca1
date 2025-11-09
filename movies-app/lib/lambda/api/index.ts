@@ -107,3 +107,55 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       return response(200, awards.Items?.map((i) => unmarshall(i)) || []);
     }
 
+        // ---- POST MOVIE (Admin only) ----
+    if (method === "POST" && path === "/movies") {
+      const body = JSON.parse(event.body || "{}");
+      const newMovie = {
+        PK: `m${body.movieId}`,
+        SK: "xxxx",
+        title: body.title,
+        releaseDate: body.releaseDate,
+        overview: body.overview,
+      };
+
+      await ddb.send(
+        new PutItemCommand({
+          TableName: TABLE_NAME,
+          Item: marshall(newMovie),
+        })
+      );
+
+      return response(201, { message: "Movie added", movie: newMovie });
+    }
+
+    // ---- DELETE MOVIE (Admin only) ----
+    if (method === "DELETE" && path.match(/^\/movies\/[0-9]+$/)) {
+      const movieId = pathParams.movieid || path.split("/")[2];
+      await ddb.send(
+        new DeleteItemCommand({
+          TableName: TABLE_NAME,
+          Key: marshall({ PK: `m${movieId}`, SK: "xxxx" }),
+        })
+      );
+      return response(200, { message: `Movie ${movieId} deleted` });
+    }
+
+    // ---- Unknown ----
+    return response(404, { error: "Endpoint not found" });
+
+  } catch (err: any) {
+    console.error("❌ Error:", err);
+    return response(500, { error: err.message || "Server error" });
+  }
+};
+
+const response = (statusCode: number, body: any) => ({
+  statusCode,
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify(body),
+});
+
+// Helper function to unmarshall DynamoDB items
+const unmarshallItem = (item: any) => {
+  return item ? unmarshall(item) : null;
+};
