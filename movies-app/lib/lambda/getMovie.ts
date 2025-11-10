@@ -32,7 +32,7 @@ export const handler: Handler = async (event) => {
     if (!commandOutput.Item) {
       return jsonResponse(404, { message: "Movie not found" });
     }
-
+// return response with movie data
        return jsonResponse(200, { data: commandOutput.Item });
   } catch (error: any) {
     console.error("Error:", error);
