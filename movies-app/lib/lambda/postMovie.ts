@@ -29,3 +29,32 @@ export const handler: Handler = async (event) => {
         Item: item,
       })
     );
+
+    return jsonResponse(201, { message: "Movie added", data: item });
+  } catch (error: any) {
+    console.error("Error:", error);
+    return jsonResponse(500, { error: error.message });
+  }
+};
+
+function jsonResponse(statusCode: number, body: any) {
+  return {
+    statusCode,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  };
+}
+
+function createDDbDocClient() {
+  const ddbClient = new DynamoDBClient({ region: process.env.REGION });
+  const marshallOptions = {
+    convertEmptyValues: true,
+    removeUndefinedValues: true,
+    convertClassInstanceToMap: true,
+  };
+  const unmarshallOptions = { wrapNumbers: false };
+  return DynamoDBDocumentClient.from(ddbClient, {
+    marshallOptions,
+    unmarshallOptions,
+  });
+}
