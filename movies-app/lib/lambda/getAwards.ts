@@ -41,6 +41,7 @@ function jsonResponse(statusCode: number, body: any) {
   };
 }
 
+// ddc client function for marshalling/unmarshalling
 function createDDbDocClient() {
   const ddbClient = new DynamoDBClient({ region: process.env.REGION });
   const marshallOptions = {
