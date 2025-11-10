@@ -25,4 +25,33 @@ export const handler: Handler = async (event) => {
       params.KeyConditionExpression += " and SK = :sk";
       params.ExpressionAttributeValues[":sk"] = awardBody;
     }
+    const commandOutput = await ddbDocClient.send(new QueryCommand(params));
+    return jsonResponse(200, { data: commandOutput.Items || [] });
+  } catch (error: any) {
+    console.error("Error:", error);
+    return jsonResponse(500, { error: error.message });
+  }
+};
+// respnse code helper ^^
+function jsonResponse(statusCode: number, body: any) {
+  return {
+    statusCode,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  };
+}
+
+function createDDbDocClient() {
+  const ddbClient = new DynamoDBClient({ region: process.env.REGION });
+  const marshallOptions = {
+    convertEmptyValues: true,
+    removeUndefinedValues: true,
+    convertClassInstanceToMap: true,
+  };
+  const unmarshallOptions = { wrapNumbers: false };
+  return DynamoDBDocumentClient.from(ddbClient, {
+    marshallOptions,
+    unmarshallOptions,
+  });
+}
 
