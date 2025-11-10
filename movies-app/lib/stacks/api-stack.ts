@@ -117,8 +117,23 @@ export class ApiStack extends Stack {
       authorizationType: apigw.AuthorizationType.COGNITO,
     });
 
-  
+      // GET /awards
+    awards.addMethod("GET", new apigw.LambdaIntegration(getAwardsFn), {
+      authorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO,
+    });
 
+    // POST /movies (admin only)
+    movies.addMethod("POST", new apigw.LambdaIntegration(postMovieFn), {
+      apiKeyRequired: true,
+    });
+
+    // DELETE /movies/{movieid} (admin only)
+    movie.addMethod("DELETE", new apigw.LambdaIntegration(deleteMovieFn), {
+      apiKeyRequired: true,
+    });
+  
+    // cdk outputs for api url and api key
     new cdk.CfnOutput(this, "MoviesApiUrl", { value: api.url ?? "" });
     new cdk.CfnOutput(this, "AdminApiKey", { value: apiKey.keyId });
   }
