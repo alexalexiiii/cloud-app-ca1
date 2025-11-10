@@ -15,7 +15,7 @@ interface LoggingStackProps extends StackProps {
 
 // cloudwatch logging group for useractivity logs
 // lambda function that logs database state changes
-export class LoggingStack extends Stack {
+export class LoggingStack extends cdk.Stack {
     public readonly logGroup: logs.LogGroup;
     public readonly stateLoggerFn?: lambda.Function;
 

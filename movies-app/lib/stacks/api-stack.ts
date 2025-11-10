@@ -20,7 +20,7 @@ interface ApiStackProps extends StackProps {
 }
 
 // stack defines all Lambda functions and API Gateway routes for the Movies App.
-export class ApiStack extends Stack {
+export class ApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
@@ -40,7 +40,7 @@ export class ApiStack extends Stack {
 
     // Get Movie by ID
     const getMovieFn = new lambdaNode.NodejsFunction(this, "GetMovieFn", {
-      entry: path.join(__dirname, "../lambda/api/getMovie.ts"),
+      entry: path.join(__dirname, "../../lambda/getMovie.ts"),
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "handler",
       environment: { TABLE_NAME: table.tableName, REGION: cdk.Aws.REGION },
@@ -50,7 +50,7 @@ export class ApiStack extends Stack {
 
     // Get Awards
     const getAwardsFn = new lambdaNode.NodejsFunction(this, "GetAwardsFn", {
-      entry: path.join(__dirname, "../lambda/api/getAwards.ts"),
+      entry: path.join(__dirname, "../../lambda/getAwards.ts"),
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "handler",
       environment: { TABLE_NAME: table.tableName, REGION: cdk.Aws.REGION },
@@ -60,7 +60,7 @@ export class ApiStack extends Stack {
 
     // Add Movie (POST)
     const postMovieFn = new lambdaNode.NodejsFunction(this, "PostMovieFn", {
-      entry: path.join(__dirname, "../lambda/api/postMovie.ts"),
+      entry: path.join(__dirname, "../../lambda/postMovie.ts"),
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "handler",
       environment: { TABLE_NAME: table.tableName, REGION: cdk.Aws.REGION },
@@ -70,7 +70,7 @@ export class ApiStack extends Stack {
 
     // Delete Movie
     const deleteMovieFn = new lambdaNode.NodejsFunction(this, "DeleteMovieFn", {
-      entry: path.join(__dirname, "../lambda/api/deleteMovie.ts"),
+      entry: path.join(__dirname, "../../lambda/deleteMovie.ts"),
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "handler",
       environment: { TABLE_NAME: table.tableName, REGION: cdk.Aws.REGION },

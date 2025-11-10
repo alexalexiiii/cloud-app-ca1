@@ -3,6 +3,7 @@
  * https://cdkworkshop.com
  * https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda-readme.html
  */
+
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { RemovalPolicy } from 'aws-cdk-lib';
