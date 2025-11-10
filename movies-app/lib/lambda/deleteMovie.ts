@@ -19,7 +19,7 @@ export const handler: Handler = async (event) => {
         Key: { PK: `m${movieId}`, SK: "xxxx" },
       })
     );
-
+// success response after deletion
     return jsonResponse(200, { message: `Movie ${movieId} deleted` });
   } catch (error: any) {
     console.error("Error:", error);
@@ -27,3 +27,25 @@ export const handler: Handler = async (event) => {
   }
 };
 
+function jsonResponse(statusCode: number, body: any) {
+  return {
+    statusCode,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  };
+}
+
+// ddc client function for marshalling/unmarshalling
+function createDDbDocClient() {
+  const ddbClient = new DynamoDBClient({ region: process.env.REGION });
+  const marshallOptions = {
+    convertEmptyValues: true,
+    removeUndefinedValues: true,
+    convertClassInstanceToMap: true,
+  };
+  const unmarshallOptions = { wrapNumbers: false };
+  return DynamoDBDocumentClient.from(ddbClient, {
+    marshallOptions,
+    unmarshallOptions,
+  });
+}
