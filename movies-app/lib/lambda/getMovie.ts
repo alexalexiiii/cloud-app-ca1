@@ -33,3 +33,18 @@ export const handler: Handler = async (event) => {
       return jsonResponse(404, { message: "Movie not found" });
     }
 
+       return jsonResponse(200, { data: commandOutput.Item });
+  } catch (error: any) {
+    console.error("Error:", error);
+    return jsonResponse(500, { error: error.message });
+  }
+};
+
+function jsonResponse(statusCode: number, body: any) {
+  return {
+    statusCode,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  };
+}
+
