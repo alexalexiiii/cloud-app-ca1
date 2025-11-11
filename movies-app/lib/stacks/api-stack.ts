@@ -137,4 +137,6 @@ export class ApiStack extends cdk.Stack {
     new cdk.CfnOutput(this, "MoviesApiUrl", { value: api.url ?? "" });
     new cdk.CfnOutput(this, "AdminApiKey", { value: apiKey.keyId });
   }
+
+  
 }
