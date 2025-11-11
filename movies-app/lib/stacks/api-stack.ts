@@ -16,17 +16,18 @@ import * as path from "path";
 interface ApiStackProps extends StackProps {
   table: dynamodb.Table;
   userPool: cognito.UserPool;
+  userPoolClient: cognito.UserPoolClient;
   logGroup: logs.LogGroup;
 }
 
-// stack defines all Lambda functions and API Gateway routes for the Movies App.
+// Stack defines all Lambda functions and API Gateway routes for the Movies App
 export class ApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
-    const { table, userPool, logGroup } = props;
+    const { table, userPool, userPoolClient, logGroup } = props;
 
-    // IAM role for Lambdas
+    // IAM role for Lambda functions
     const lambdaRole = new iam.Role(this, "LambdaRole", {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
       managedPolicies: [
@@ -35,7 +36,6 @@ export class ApiStack extends cdk.Stack {
         ),
       ],
     });
-
     table.grantReadWriteData(lambdaRole);
 
     // Get Movie by ID
@@ -78,8 +78,27 @@ export class ApiStack extends cdk.Stack {
     });
     table.grantWriteData(deleteMovieFn);
 
-   // api gateway
+    // Signin Lambda
+    const signinFn = new lambdaNode.NodejsFunction(this, "SigninFn", {
+      entry: path.join(__dirname, "../../lambda/auth/signin.ts"),
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: "handler",
+      environment: {
+        REGION: cdk.Aws.REGION,
+        CLIENT_ID: userPoolClient.userPoolClientId,
+      },
+      role: lambdaRole,
+    });
 
+    // Signout Lambda
+    const signoutFn = new lambdaNode.NodejsFunction(this, "SignoutFn", {
+      entry: path.join(__dirname, "../../lambda/auth/signout.ts"),
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: "handler",
+      role: lambdaRole,
+    });
+
+    // API Gateway
     const api = new apigw.RestApi(this, "MoviesApi", {
       restApiName: "Movies REST API",
       deployOptions: {
@@ -89,7 +108,7 @@ export class ApiStack extends cdk.Stack {
       },
     });
 
-    // Cognito authorizer for GET routes
+    // Cognito authorizer for authenticated routes
     const authorizer = new apigw.CognitoUserPoolsAuthorizer(
       this,
       "MoviesAuthorizer",
@@ -98,45 +117,48 @@ export class ApiStack extends cdk.Stack {
       }
     );
 
-    // API key for admin operations
+    // API key and usage plan for admin-only operations
     const apiKey = api.addApiKey("AdminApiKey");
     const usagePlan = api.addUsagePlan("AdminUsagePlan", {
       apiStages: [{ api, stage: api.deploymentStage }],
     });
     usagePlan.addApiKey(apiKey);
 
- // endpoint resources
-
+    // API resources
     const movies = api.root.addResource("movies");
     const movie = movies.addResource("{movieid}");
     const awards = api.root.addResource("awards");
+    const signin = api.root.addResource("signin");
+    const signout = api.root.addResource("signout");
 
-    // GET /movies/{movieid}
+    // GET /movies/{movieid} (requires authentication)
     movie.addMethod("GET", new apigw.LambdaIntegration(getMovieFn), {
       authorizer,
       authorizationType: apigw.AuthorizationType.COGNITO,
     });
 
-      // GET /awards
+    // GET /awards (requires authentication)
     awards.addMethod("GET", new apigw.LambdaIntegration(getAwardsFn), {
       authorizer,
       authorizationType: apigw.AuthorizationType.COGNITO,
     });
 
-    // POST /movies (admin only)
+    // POST /movies (admin-only)
     movies.addMethod("POST", new apigw.LambdaIntegration(postMovieFn), {
       apiKeyRequired: true,
     });
 
-    // DELETE /movies/{movieid} (admin only)
+    // DELETE /movies/{movieid} (admin-only)
     movie.addMethod("DELETE", new apigw.LambdaIntegration(deleteMovieFn), {
       apiKeyRequired: true,
     });
-  
-    // cdk outputs for api url and api key
+
+    // Authentication endpoints
+    signin.addMethod("POST", new apigw.LambdaIntegration(signinFn));
+    signout.addMethod("GET", new apigw.LambdaIntegration(signoutFn));
+
+    // Outputs for stack
     new cdk.CfnOutput(this, "MoviesApiUrl", { value: api.url ?? "" });
     new cdk.CfnOutput(this, "AdminApiKey", { value: apiKey.keyId });
   }
-
-  
 }

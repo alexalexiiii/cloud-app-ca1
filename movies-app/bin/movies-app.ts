@@ -14,6 +14,7 @@ const logStack = new LoggingStack(app, 'LoggingStack');
 new ApiStack(app, 'ApiStack', {
   table: dbStack.table,
   userPool: authStack.userPool,
+  userPoolClient: authStack.userPoolClient,
   logGroup: logStack.logGroup,
 });
 

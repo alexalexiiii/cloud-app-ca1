@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 
 export class AuthStack extends cdk.Stack {
   public readonly userPool: cognito.UserPool;
+  public readonly userPoolClient: cognito.UserPoolClient; 
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
@@ -13,8 +14,8 @@ export class AuthStack extends cdk.Stack {
     signInAliases: {email: true, username: true},
   });
 
-  this.userPool.addClient('MoviesAppClient', {
-    authFlows: {userPassword: true },
-  });
-}
+this.userPoolClient = this.userPool.addClient('MoviesAppClient', { 
+      authFlows: { userPassword: true },
+    });
+  }
 }
