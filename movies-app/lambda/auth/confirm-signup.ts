@@ -1,10 +1,10 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import { ConfirmSignUpBody } from "../../lib/shared/types";
 import {
   CognitoIdentityProviderClient,
   ConfirmSignUpCommand,
   ConfirmSignUpCommandInput,
 } from "@aws-sdk/client-cognito-identity-provider";
-import { ConfirmSignUpBody } from "../../lib/shared/types-schema.json";
 
 import Ajv from "ajv";
 import schema from "../../lib/shared/types-schema.json";
@@ -33,7 +33,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         }),
       };
     }
-    const confirmSignUpBody = body as ConfirmSignUpBody;
+    const confirmSignUpBody = body as unknown as ConfirmSignUpBody;
 
     const params: ConfirmSignUpCommandInput = {
       ClientId: process.env.CLIENT_ID!,

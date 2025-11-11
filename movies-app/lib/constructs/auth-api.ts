@@ -17,8 +17,7 @@ export class AuthApi extends Construct {
   constructor(scope: Construct, id: string, props: AuthApiProps) {
     super(scope, id);
 
-    ({ userPoolId: this.userPoolId, userPoolClientId: this.userPoolClientId } =
-      props);
+    ({ userPoolId: this.userPoolId, userPoolClientId: this.userPoolClientId } = props);
 
     const api = new apig.RestApi(this, "AuthServiceApi", {
       description: "Authentication Service RestApi",
@@ -31,19 +30,9 @@ export class AuthApi extends Construct {
     this.auth = api.root.addResource("auth");
 
     this.addAuthRoute("signup", "POST", "SignupFn", "signup.ts");
-
-    this.addAuthRoute(
-      "confirm_signup",
-      "POST",
-      "ConfirmFn",
-      "confirm-signup.ts"
-    );
-
- this.addAuthRoute("signup", "POST", "SignupFn", "signup.ts");
-this.addAuthRoute("confirm_signup", "POST", "ConfirmFn", "confirm-signup.ts");
-this.addAuthRoute("signout", "GET", "SignoutFn", "signout.ts");
-this.addAuthRoute("signin", "POST", "SigninFn", "signin.ts");
-
+    this.addAuthRoute("confirm_signup", "POST", "ConfirmFn", "confirm-signup.ts");
+    this.addAuthRoute("signout", "GET", "SignoutFn", "signout.ts");
+    this.addAuthRoute("signin", "POST", "SigninFn", "signin.ts");
   }
 
   private addAuthRoute(
