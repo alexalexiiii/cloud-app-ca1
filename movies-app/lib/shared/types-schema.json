@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SignUpBody": {
+      "type": "object",
+      "properties": {
+        "username": { "type": "string", "minLength": 3 },
+        "password": { "type": "string", "minLength": 8 },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User's email address"
+        }
+      },
+      "required": ["username", "password", "email"],
+      "additionalProperties": false
+    },
+
+    "ConfirmSignUpBody": {
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "code": { "type": "string", "minLength": 6, "maxLength": 6 }
+      },
+      "required": ["username", "code"],
+      "additionalProperties": false
+    },
+
+    "SignInBody": {
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      },
+      "required": ["username", "password"],
+      "additionalProperties": false
+    },
+
+    "TokenBody": {
+      "type": "object",
+      "properties": {
+        "token": { "type": "string" }
+      },
+      "required": ["token"],
+      "additionalProperties": false
+    },
+
+    "GenericResponse": {
+      "type": "object",
+      "properties": {
+        "message": { "type": "string" },
+        "data": {}
+      },
+      "required": ["message"],
+      "additionalProperties": true
+    }
+  }
+}
