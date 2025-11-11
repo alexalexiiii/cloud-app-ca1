@@ -1,13 +1,14 @@
-import { Aws } from "aws-cdk-lib";
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apig from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as node from "aws-cdk-lib/aws-lambda-nodejs";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb"; 
 
 type AppApiProps = {
   userPoolId: string;
   userPoolClientId: string;
+  table: dynamodb.Table; 
 };
 
 export class AppApi extends Construct {
@@ -32,13 +33,15 @@ export class AppApi extends Construct {
         USER_POOL_ID: props.userPoolId,
         CLIENT_ID: props.userPoolClientId,
         REGION: cdk.Aws.REGION,
+        TABLE_NAME: props.table.tableName, 
       },
     };
 
+    // Create API resources
     const protectedRes = appApi.root.addResource("protected");
-
     const publicRes = appApi.root.addResource("public");
 
+    // Create Lambda functions
     const protectedFn = new node.NodejsFunction(this, "ProtectedFn", {
       ...appCommonFnProps,
       entry: `${__dirname}/../../lambda/protected.ts`,
@@ -49,6 +52,11 @@ export class AppApi extends Construct {
       entry: `${__dirname}/../../lambda/public.ts`,
     });
 
+    // grant db perms
+    props.table.grantReadWriteData(protectedFn);
+    props.table.grantReadData(publicFn);
+
+    // Authorizer Lambda
     const authorizerFn = new node.NodejsFunction(this, "AuthorizerFn", {
       ...appCommonFnProps,
       entry: "./lambda/auth/authorizer.ts",
@@ -64,6 +72,7 @@ export class AppApi extends Construct {
       }
     );
 
+    // Define routes
     protectedRes.addMethod("GET", new apig.LambdaIntegration(protectedFn), {
       authorizer: requestAuthorizer,
       authorizationType: apig.AuthorizationType.CUSTOM,

@@ -1,13 +1,19 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { UserPool } from "aws-cdk-lib/aws-cognito";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import { AuthApi } from "../constructs/auth-api";
 import { AppApi } from "../constructs/app-api";
 
+interface CognitoStackProps extends cdk.StackProps {
+  table: dynamodb.Table;
+}
+
 export class CognitoStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: CognitoStackProps) {
     super(scope, id, props);
 
+    const { table } = props;
     // 1️Create the Cognito user pool
     const userPool = new UserPool(this, "MoviesUserPool", {
       selfSignUpEnabled: true,
@@ -34,6 +40,7 @@ export class CognitoStack extends cdk.Stack {
     new AppApi(this, "AppApi", {
       userPoolId,
       userPoolClientId,
+      table,
     });
   }
 }

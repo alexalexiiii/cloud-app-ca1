@@ -1,20 +1,17 @@
 #!/usr/bin/env node
-import * as cdk from 'aws-cdk-lib';
-import { DatabaseStack } from '../lib/stacks/database-stack';
-import { AuthStack } from '../lib/stacks/auth-stack';
-import { LoggingStack } from '../lib/stacks/logging-stack';
-import { CognitoStack } from '../lib/stacks/cognito-stack';
+import * as cdk from "aws-cdk-lib";
+import { DatabaseStack } from "../lib/stacks/database-stack";
+import { LoggingStack } from "../lib/stacks/logging-stack";
+import { CognitoStack } from "../lib/stacks/cognito-stack";
 
 const app = new cdk.App();
 
-const dbStack = new DatabaseStack(app, 'DatabaseStack');
-const authStack = new AuthStack(app, 'AuthStack');
-const logStack = new LoggingStack(app, 'LoggingStack');
+const logStack = new LoggingStack(app, "LoggingStack");
+const dbStack = new DatabaseStack(app, "DatabaseStack");
 
-const cognitoStack = new CognitoStack(app, 'CognitoStack');
+const cognitoStack = new CognitoStack(app, "CognitoStack", {
+  table: dbStack.table,
+} as any);
 
-// add stack dependencies
-dbStack.addDependency(authStack);
-dbStack.addDependency(logStack);
-authStack.addDependency(logStack);
-cognitoStack.addDependency(authStack);
+cognitoStack.addDependency(logStack);
+cognitoStack.addDependency(dbStack);
