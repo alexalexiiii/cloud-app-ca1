@@ -76,7 +76,7 @@ export class AppApi extends Construct {
       authorizer: requestAuthorizer,
       authorizationType: apig.AuthorizationType.CUSTOM,
     });
-    
+
 // ─── Movies and Awards Routes ────────────────────────────────────────────────
 const movies = appApi.root.addResource("movies");
 const movie = movies.addResource("{movieid}");
@@ -128,3 +128,5 @@ movie.addMethod("GET", new apig.LambdaIntegration(getMovieFn));
 movie.addMethod("DELETE", new apig.LambdaIntegration(deleteMovieFn));
 movie.addResource("actors").addMethod("GET", new apig.LambdaIntegration(getActorsFn));
 awards.addMethod("GET", new apig.LambdaIntegration(getAwardsFn));
+  }
+}

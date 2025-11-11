@@ -1,76 +1,47 @@
 import { Handler } from "aws-lambda";
-
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+
 // Initialization
 const ddbDocClient = createDDbDocClient();
+
+function createDDbDocClient() {
+  const ddbClient = new DynamoDBClient({});
+  return DynamoDBDocumentClient.from(ddbClient);
+}
+
 // Handler
-export const handler: Handler = async (event, context) => {
+export const handler: Handler = async (event) => {
   try {
-    console.log("Event: ", JSON.stringify(event));
-    const parameters = event?.queryStringParameters;
-    const movieId = parameters ? parseInt(parameters.movieId) : undefined;
+    console.log("Event:", JSON.stringify(event)); 
+    const movieId = event.pathParameters?.movieid;
 
     if (!movieId) {
-      return {
-        statusCode: 404,
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ Message: "Missing movie Id" }),
-      };
+      return jsonResponse(400, { message: "Missing movie ID" });
     }
+
     const commandOutput = await ddbDocClient.send(
       new GetCommand({
         TableName: process.env.TABLE_NAME,
-        Key: { id: movieId },
+        Key: { PK: `m${movieId}`, SK: "xxxx" },
       })
     );
-    if (!commandOutput.Item) {
-      return {
-        statusCode: 404,
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ Message: "Invalid movie Id" }),
-      };
-    }
-    const body = {
-      data: commandOutput.Item,
-    };
 
-    // Return Response
-    return {
-      statusCode: 200,
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(body),
-    };
+    if (!commandOutput.Item) {
+      return jsonResponse(404, { message: "Movie not found" });
+    }
+
+    return jsonResponse(200, { data: commandOutput.Item });
   } catch (error: any) {
-    console.log(JSON.stringify(error));
-    return {
-      statusCode: 500,
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ error }),
-    };
+    console.error("Error:", error);
+    return jsonResponse(500, { error: error.message });
   }
 };
 
-// ddc client function for marshalling/unmarshalling
-function createDDbDocClient() {
-  const ddbClient = new DynamoDBClient({ region: process.env.REGION });
-  const marshallOptions = {
-    convertEmptyValues: true,
-    removeUndefinedValues: true,
-    convertClassInstanceToMap: true,
+function jsonResponse(statusCode: number, body: any) {
+  return {
+    statusCode,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
   };
-  const unmarshallOptions = {
-    wrapNumbers: false,
-  };
-  const translateConfig = { marshallOptions, unmarshallOptions };
-  return DynamoDBDocumentClient.from(ddbClient, translateConfig);
 }
-
