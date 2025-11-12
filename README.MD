@@ -9,7 +9,7 @@ __Demo:__ https://youtu.be/ntk75g-HxWk
 
 Web App API, as seen from the AWS management console.
 
-![appapi](cloud-app-ca1/appapi.png)
+![appapi](appapi.png)
 
 [A screenshot of your seeded table from DynamoDB, e.g.
 
